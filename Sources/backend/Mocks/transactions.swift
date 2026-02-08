@@ -1,7 +1,7 @@
 import Vapor
 
-func initTransactionsMock() -> [Transaction] {
-  [
+func initTransactionsMock(app: Application) async throws {
+  let mockData = [
     Transaction(
       amount: 100.0,
       currency: "USD",
@@ -23,4 +23,6 @@ func initTransactionsMock() -> [Transaction] {
       status: .refunded,
     ),
   ]
+
+  try await mockData.create(on: app.db)
 }

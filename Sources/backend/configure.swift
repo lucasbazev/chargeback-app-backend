@@ -18,8 +18,8 @@ public func configure(_ app: Application) async throws {
     as: .psql
   )
 
-  // uncomment to serve files from /Public folder
-  // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
+  // populate transactions table with some data
+  try await initTransactionsMock(app: app)
 
   // register routes
   try routes(app)

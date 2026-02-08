@@ -1,5 +1,17 @@
+import Fluent
 import Foundation
 import Vapor
+
+struct CreateTransactionRequest: Content {
+  let amount: Double
+  let currency: String
+}
+
+struct GetTransactionsQuery: Content {
+  let status: TransactionStatus?
+  let min: Double?
+  let max: Double?
+}
 
 enum TransactionStatus: String, Codable {
   case pending
@@ -8,6 +20,40 @@ enum TransactionStatus: String, Codable {
   case refunded
 }
 
+final class Transaction: Model, Content, @unchecked Sendable {
+  static let schema: String = "transactions"
+
+  @ID(key: .id)
+  var id: UUID?
+
+  @Field(key: "amount")
+  var amount: Double
+
+  @Field(key: "currency")
+  var currency: String
+
+  @Field(key: "status")
+  var status: TransactionStatus
+
+  @Timestamp(key: "created_at", on: .create)
+  var createdAt: Date?
+
+  @Timestamp(key: "updated_at", on: .update)
+  var updatedAt: Date?
+
+  init() {}
+
+  init(
+    id: UUID? = nil, amount: Double, currency: String = "USD", status: TransactionStatus = .pending
+  ) {
+    self.id = id
+    self.amount = amount
+    self.currency = currency
+    self.status = status
+  }
+}
+
+/*
 struct Transaction: Content {
   let id: Int
   let amount: Double
@@ -31,14 +77,4 @@ struct Transaction: Content {
     self.updatedAt = updatedAt ?? Date()
   }
 }
-
-struct CreateTransactionRequest: Content {
-  let amount: Double
-  let currency: String
-}
-
-struct GetTransactionsQuery: Content {
-  let status: TransactionStatus?
-  let min: Double?
-  let max: Double?
-}
+*/
