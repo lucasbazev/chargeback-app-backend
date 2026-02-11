@@ -51,6 +51,13 @@ final class Transaction: Model, Content, @unchecked Sendable {
     self.currency = currency
     self.status = status
   }
+
+  init(from: CreateTransactionRequest) {
+    self.id = nil
+    self.amount = from.amount
+    self.currency = from.currency
+    self.status = .pending
+  }
 }
 
 /*
