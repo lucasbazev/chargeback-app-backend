@@ -13,6 +13,10 @@ struct GetTransactionsQuery: Content {
   let max: Double?
 }
 
+struct UpdateTransactionRequest: Content {
+  let status: TransactionStatus
+}
+
 enum TransactionStatus: String, Codable, Sendable {
   case pending
   case completed

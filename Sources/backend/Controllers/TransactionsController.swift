@@ -8,6 +8,8 @@ struct TransactionsController: RouteCollection {
     transactions.get(use: getAll)
     transactions.get(":id", use: getById)
     transactions.post(use: create)
+    transactions.put(":id", use: update)
+    transactions.delete(":id", use: delete)
   }
 
   func getAll(req: Request) async throws -> [Transaction] {
@@ -26,7 +28,7 @@ struct TransactionsController: RouteCollection {
     }
 
     guard let transaction = try await Transaction.find(id, on: req.db) else {
-      throw Abort(.notFound, reason: "Transaction not found.")
+      throw Abort(.notFound)
     }
 
     return transaction
@@ -41,5 +43,37 @@ struct TransactionsController: RouteCollection {
     try await transaction.save(on: req.db)
 
     return transaction
+  }
+
+  // Only property that can be changed in a transaction is its status
+  func update(req: Request) async throws -> Transaction {
+    guard let id = req.parameters.get("id", as: UUID.self) else {
+      throw Abort(.badRequest, reason: "Missing transaction ID")
+    }
+
+    guard let payload = try req.content.decode(UpdateTransactionRequest?.self) else {
+      throw Abort(.badRequest, reason: "Invalid transaction status data.")
+    }
+
+    if let transaction = try await Transaction.find(id, on: req.db) {
+      transaction.status = payload.status
+      try await transaction.update(on: req.db)
+      return transaction
+    } else {
+      throw Abort(.notFound)
+    }
+  }
+
+  func delete(req: Request) async throws -> [String: Bool] {
+    guard let id = req.parameters.get("id", as: UUID.self) else {
+      throw Abort(.badRequest, reason: "Missing transaction ID")
+    }
+
+    guard let transaction = try await Transaction.find(id, on: req.db) else {
+      throw Abort(.notFound)
+    }
+
+    try await transaction.delete(on: req.db)
+    return ["deleted": true]
   }
 }
